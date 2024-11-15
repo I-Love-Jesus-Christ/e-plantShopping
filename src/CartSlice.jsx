@@ -10,6 +10,7 @@ export const CartSlice = createSlice({
     
     },
     removeItem: (state, action) => {
+      
     },
     updateQuantity: (state, action) => {
 
