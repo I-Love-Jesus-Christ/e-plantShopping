@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import './ProductList.css'
+import React, { useState, useEffect, Fragment} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import './ProductList.css';
 import CartItem from './CartItem';
 import PlantGrid from './PlantGrid';
 import { addItem } from './CartSlice';
+
 function ProductList() {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
     const [addedToCart, setAddedToCart] = useState({});
-
+    const dispatch = useDispatch();
+    const cart_quantity_count = useSelector(function (state) {
+        return state.cart.cart_quantity_count;
+    })
 
     const plantsArray = [
         {
@@ -251,15 +256,43 @@ function ProductList() {
         setShowCart(false);
     };
 
-    function handleAddToCart(plant){
+    function handleAddToCart(product){
+        product.quantity = 1;
         setAddedToCart(function(current_state){
             return {
                 ...current_state, 
-                [plant.name]: true
+                [product.name]: true
             }
         });
-        useDispatch(addItem(plant));
+        dispatch(addItem(product));
     }
+
+    const product_sections = plantsArray.map(function (product_section){return (
+        <Fragment key={product_section.category}>
+            <div className="plantname_heading">
+                <h2 className="plant_heading">{product_section.category}</h2>
+            </div>
+            <div className="product-list">
+                {product_section.plants.map(function(product) {return (
+                    <div key={product.name} className="product-card">
+                        <div className="product-title">{product.name}</div>
+                        <img className="product-image" src={product.image}/>
+                        <div className="product-price">{product.cost}</div>
+                        <div className="product-description">{product.description}</div>
+                        {addedToCart[product.name] ? 
+                            <button className="product-button added-to-cart">Add to Cart</button>
+                        :
+                            <button className="product-button" onClick={function() {
+                                handleAddToCart(product);
+                            }}>Add to Cart</button> 
+                        }
+                    </div>
+                )})}
+            </div>
+        </Fragment>
+    )});
+        
+
 
     return (
         <div>
@@ -278,35 +311,24 @@ function ProductList() {
                 </div>
                 <div style={styleObjUl}>
                     <div> <a href="#" onClick={(e) => handlePlantsClick(e)} style={styleA}>Plants</a></div>
-                    <div> <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}><h1 className='cart'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68"><rect width="156" height="156" fill="none"></rect><circle cx="80" cy="216" r="12"></circle><circle cx="184" cy="216" r="12"></circle><path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" id="mainIconPathAttribute"></path></svg></h1></a></div>
+                    <div> 
+                        <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}>
+                            <h1 className='cart'>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68">
+                                    <rect width="156" height="156" fill="none"></rect>
+                                    <circle cx="80" cy="216" r="12"></circle>
+                                    <circle cx="184" cy="216" r="12"></circle>
+                                    <path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" id="mainIconPathAttribute"></path>
+                                </svg>
+                                <div className="cart_quantity_count">{cart_quantity_count}</div>
+                            </h1>
+                        </a>
+                    </div>
                 </div>
             </div>
             {!showCart ? (
                 <div className="product-grid">          
-                        {           
-                            plantsArray.map(function(object_1){ return(<>
-                                <div className="row">
-                                    <div className="col-12">
-                                        <h2 className="category">{object_1.category}</h2>
-                                    </div>
-                                </div>
-                                <div className="row">
-                                    {object_1.plants.map(function(object_2) {return (<>
-                                        <div className="col-4">                                    
-                                            <div className="plant">
-                                                <p className="name">{object_2.name}</p>
-                                                <img className="image" src={object_2.image}></img>
-                                                <p className="cost">{object_2.cost}</p>
-                                                <p className= "description">{object_2.description}</p>   
-                                                <button onClick={function(){
-                                                    handleAddToCart(object_2);
-                                                }} className="add_to_cart">Add to cart</button>                                
-                                            </div>
-                                        </div>
-                                    </>)})}
-                                </div>
-                            </>)})
-                        }
+                    {product_sections}
                 </div>
             ) : (
                 <CartItem onContinueShopping={handleContinueShopping} />

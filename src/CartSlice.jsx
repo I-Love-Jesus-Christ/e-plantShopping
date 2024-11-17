@@ -1,46 +1,38 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-class CartItem {
-  constructor(product) {
-    this.product = product;
-    this.quantity = 1;
-  }
-  calculate_total_cost(){
-    let string_of_cost_number = this.product.cost.slice(1);
-    let cost_number = Number(string_of_cost_number);
-    let total_cost_number = this.quantity * cost_number;
-    let total_cost = '$' + total_cost_number;
-    return total_cost;
-  }
+const initialState = {
+  items: [],
+  cart_quantity_count: 0
 }
 
 export const CartSlice = createSlice({
   name: 'cart',
-  initialState: {
-    items: [], // Initialize items as an empty array
-  },
+  initialState,
   reducers: {
     addItem: (state, action) => {
-      let cart_item = new CartItem(action.payload);
-      state.items.push(cart_item);
+      state.items.push(action.payload);
+      state.cart_quantity_count += 1;
     },
 
     removeItem: (state, action) => {
-      index = state.items.findIndex(function(cart_item){
-        return cart_item.product.name == action.payload.product.name;
+      const index = state.items.findIndex(function(cart_item){
+        return cart_item.name == action.payload.name;
       });
       state.items.splice(index, 1);
+      state.cart_quantity_count -= action.payload.quantity;
     },
 
     updateQuantity: (state, action) => {
-      index = state.items.findIndex(function(cart_item){
-        return cart_item.product.name == action.payload.product.name;
+      const index = state.items.findIndex(function(cart_item){
+        return cart_item.name == action.payload.item.name;
       });
-      state.items[index].quantity = action.payload.quantity;
-    },
-  },
+      const difference = action.payload.difference;
+      state.cart_quantity_count += difference;
+      state.items[index].quantity += difference;     
+    }
+  }
 });
 
-export const { addItem, removeItem, updateQuantity } = CartSlice.actions;
+export const { addItem, removeItem, updateQuantity} = CartSlice.actions;
 
 export default CartSlice.reducer;
