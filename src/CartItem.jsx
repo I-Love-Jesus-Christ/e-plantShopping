@@ -88,7 +88,9 @@ const CartItem = ({ onContinueShopping, signal_item_removed_from_cart }) => {
       <div className="continue_shopping_btn">
         <button className="get-started-button" onClick={(e) => handleContinueShopping(e)}>Continue Shopping</button>
         <br />
-        <button className="get-started-button1">Checkout</button>
+        <button className="get-started-button1" onClick={function(event){
+          handleCheckoutShopping(event);
+        }}>Checkout</button>
       </div>
     </div>
   );
