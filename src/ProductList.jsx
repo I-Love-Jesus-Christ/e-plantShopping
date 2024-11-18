@@ -2,7 +2,6 @@ import React, { useState, useEffect, Fragment} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import './ProductList.css';
 import CartItem from './CartItem';
-import PlantGrid from './PlantGrid';
 import { addItem } from './CartSlice';
 
 function ProductList() {
@@ -10,9 +9,19 @@ function ProductList() {
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
     const [addedToCart, setAddedToCart] = useState({});
     const dispatch = useDispatch();
-    const cart_quantity_count = useSelector(function (state) {
+    let cart_quantity_count = useSelector(function (state) {
         return state.cart.cart_quantity_count;
-    })
+    });
+
+    function signal_item_removed_from_cart(cart_item_name){
+        setAddedToCart(function(current_state){ 
+            return {
+                ...current_state,
+                [cart_item_name]: false 
+            };    
+        });
+    }
+    
 
     const plantsArray = [
         {
@@ -281,17 +290,16 @@ function ProductList() {
                         <div className="product-description">{product.description}</div>
                         {addedToCart[product.name] ? 
                             <button className="product-button added-to-cart">Add to Cart</button>
-                        :
+                        :(
                             <button className="product-button" onClick={function() {
                                 handleAddToCart(product);
                             }}>Add to Cart</button> 
-                        }
+                        )}
                     </div>
                 )})}
             </div>
         </Fragment>
     )});
-        
 
 
     return (
@@ -331,7 +339,7 @@ function ProductList() {
                     {product_sections}
                 </div>
             ) : (
-                <CartItem onContinueShopping={handleContinueShopping} />
+                <CartItem onContinueShopping={handleContinueShopping} signal_item_removed_from_cart={signal_item_removed_from_cart}/>
             )}
         </div>
     );
